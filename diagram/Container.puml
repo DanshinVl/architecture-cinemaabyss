@@ -1,0 +1,75 @@
+@startuml
+title CinemaAbyss Container Diagram
+
+top to bottom direction
+
+skinparam nodesep 90
+skinparam ranksep 120
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User", "A user of the CinemaAbyss streaming service")
+Person(support, "Support", "Supports clients of the streaming service")
+
+System_Boundary(CinemaAbyss, "CinemaAbyss (TO-BE)") {
+
+  Container(WebApp, "Web/Mobile/SmartTV App", "Web/Mobile/TV", "Client applications for watching and managing account")
+  Container(ApiGateway, "API Gateway/BFF", "Java, Spring Boot", "Single entry point, auth, routing, aggregation")
+
+  Container(AuthMS, "Auth/User Service", "Java, Spring Boot", "Users, profiles, authentication/authorization (tokens, sessions)")
+  Container(CatalogMS, "Catalog Service", "Java, Spring Boot", "Movie metadata: titles, genres, actors, search, filters")
+  Container(SubscriptionMS, "Subscription Service", "Java, Spring Boot", "Subscription plans, user subscriptions, access state")
+  Container(PaymentMS, "Payment Service", "Java, Spring Boot", "Payment intents, confirmations, refunds; interacts with payment provider")
+  Container(StreamingMS, "Streaming Service", "Java, Spring Boot", "Playback sessions, DRM/license checks, access validation, streaming links")
+  Container(RecoAdapterMS, "Recommendation Adapter", "Java, Spring Boot", "Publishes events and queries external recommendation system")
+
+  ContainerDb(UserDB, "User DB", "PostgreSQL", "Users, profiles, auth data")
+  ContainerDb(CatalogDB, "Catalog DB", "PostgreSQL", "Metadata and catalog indexes")
+  ContainerDb(SubscriptionDB, "Subscription DB", "PostgreSQL", "Subscriptions, plans, access status")
+  ContainerDb(PaymentDB, "Payment DB", "PostgreSQL", "Payments, transactions, idempotency keys")
+  ContainerDb(StreamingDB, "Streaming DB", "PostgreSQL", "Playback sessions, watch history pointers")
+
+  Container(MessageBroker, "Message Broker", "Kafka", "Async events (payments/subscriptions/views)")
+
+  Container(S3, "Object Storage", "S3", "Video assets, posters, thumbnails, manifests")
+}
+
+System_Ext(PaymentProvider, "Payment Provider", "External system", "Processes card payments")
+System_Ext(OnlineCinemas, "Online cinemas/Content providers", "External system", "Provide licensed content/streams/metadata")
+System_Ext(RecoSystem, "External Recommendation System", "External system", "Builds recommendations based on events")
+
+Rel(user, WebApp, "Uses", "HTTPS")
+Rel(support, WebApp, "Supports users", "HTTPS")
+
+Rel(WebApp, ApiGateway, "API calls", "HTTPS/REST")
+Rel(ApiGateway, AuthMS, "Login/register/profile", "HTTPS/REST")
+Rel(ApiGateway, CatalogMS, "Browse/search metadata", "HTTPS/REST")
+Rel(ApiGateway, SubscriptionMS, "Manage subscription", "HTTPS/REST")
+Rel(ApiGateway, PaymentMS, "Pay/confirm payment", "HTTPS/REST")
+Rel(ApiGateway, StreamingMS, "Start playback/get stream", "HTTPS/REST")
+Rel(ApiGateway, RecoAdapterMS, "Get recommendations", "HTTPS/REST")
+
+Rel(AuthMS, UserDB, "Reads/Writes", "SQL")
+Rel(CatalogMS, CatalogDB, "Reads/Writes", "SQL")
+Rel(SubscriptionMS, SubscriptionDB, "Reads/Writes", "SQL")
+Rel(PaymentMS, PaymentDB, "Reads/Writes", "SQL")
+Rel(StreamingMS, StreamingDB, "Reads/Writes", "SQL")
+
+Rel(StreamingMS, S3, "Reads video/manifests/posters", "S3 API")
+Rel(CatalogMS, S3, "Reads posters/thumbnails", "S3 API")
+
+Rel(PaymentMS, PaymentProvider, "Process payments", "HTTPS")
+Rel(StreamingMS, OnlineCinemas, "Request licensed streams/entitlements", "HTTPS")
+Rel(CatalogMS, OnlineCinemas, "Import/update metadata", "HTTPS")
+
+Rel(PaymentMS, MessageBroker, "Publishes: PaymentSucceeded/Failed", "KafkaProducer/JSON")
+Rel(SubscriptionMS, MessageBroker, "Publishes: SubscriptionActivated/Expired", "KafkaProducer/JSON")
+Rel(StreamingMS, MessageBroker, "Publishes: ViewStarted/Completed", "KafkaProducer/JSON")
+
+Rel(SubscriptionMS, MessageBroker, "Consumes: PaymentSucceeded", "KafkaConsumer/JSON")
+Rel(RecoAdapterMS, MessageBroker, "Consumes: View/Subscription/Payment", "KafkaConsumer/JSON")
+
+Rel(RecoAdapterMS, RecoSystem, "Send events/query recos", "Kafka")
+Rel(RecoSystem, MessageBroker, "Recommendations/events channel", "Kafka")
+
+@enduml
