@@ -5,7 +5,7 @@
 1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
 Результат представьте в виде контейнерной диаграммы в нотации С4.
 Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+[Diagram](https://disk.yandex.ru/i/jfkyLJ8AlFKUVg)
 
 # Задание 2
 
@@ -57,7 +57,11 @@
     - Добавьте в docker-compose новый сервис, kafka там уже есть
 
 Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman 
-Приложите скриншот тестов и скриншот состояния топиков Kafka из UI http://localhost:8090 
+Приложите скриншот тестов и скриншот состояния топиков Kafka из UI http://localhost:8090
+[Tests](https://disk.yandex.ru/i/vXRF8F9InxDjSw)
+[Movie_events](https://disk.yandex.ru/i/LtA8aap5FhiKjA)
+[payment_events](https://disk.yandex.ru/i/_GXb0f3MFRmUiw)
+[User_events](https://disk.yandex.ru/i/wC8JDFkOOrk2UA)
 
 # Задание 3
 
@@ -274,6 +278,8 @@ cat .docker/config.json | base64
 
 #### Шаг 3
 Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
+[Out](https://disk.yandex.ru/i/Od3vPSX0dySS-Q)
+[Event_service_log](https://disk.yandex.ru/i/OWy8dWEgXulu2g)
 
 
 # Задание 4
@@ -349,6 +355,8 @@ minikube tunnel
 Потом вызовите 
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
+[Helm](https://disk.yandex.ru/i/J6msHQ86BaKfHg)
+[Out](https://disk.yandex.ru/i/CZpgmolVn7KsOg)
 
 ## Удаляем все
 
